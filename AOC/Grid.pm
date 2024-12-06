@@ -104,4 +104,18 @@ sub makeGrid($height, $width, $val)
     return $grid;
 }
 
+sub clone($self)
+{
+    my @g;
+    for my $r ( 0 .. $self->height() )
+    {
+        push @g, [ $self->{_grid}->[$r]->@* ];
+    }
+    my $grid = AOC::Grid->new();
+    $grid->{_grid} = \@g;
+    $grid->{_height} = $self->height;
+    $grid->{_width}  = $self->width;
+    return $grid;
+}
+
 1;
