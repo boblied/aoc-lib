@@ -7,65 +7,62 @@
 # Description:
 #=============================================================================
 
-package AOC::Grid;
+use v5.40;
+use feature 'class'; no warnings "experimental::class";
 
-use v5.38;
+class AOC::Grid;
 
-require Exporter;
-our @ISA = qw(Exporter);
-our @EXPORT = qw(loadGrid);
-our @EXPORT_OK = qw(makeGrid);
+field $_grid   :param(grid)   = [["?"]];
+field $_height :param(height) = 0;      # Last index
+field $_width  :param(width)  = 0;      # Last index
 
-sub new
-{
-    my $class = shift;
-    $class = ref($class) || $class;
-    my $self = {
-        _grid => [],
-        _height => 0,
-        _width => 0,
-    };
-    bless $self, $class;
-    return $self;
-}
 
-sub grid($self)   { $self->{_grid} }
-sub height($self) { $self->{_height} }
-sub width($self)  { $self->{_width} }
+method grid()   { ${_grid} }
+method height() { ${_height} }
+method width()  { ${_width} }
 
-sub get($self, $row, $col) { $self->{_grid}->[$row][$col] }
+method get($row, $col) { ${_grid}->[$row][$col] }
 
-sub isValidRow($self, $row) { $row >= 0 && $row <= $self->{_height} }
-sub isValidCol($self, $col) { $col >= 0 && $col <= $self->{_width}  }
-sub isInbounds($self, $row, $col)
+method isValidRow($row) { $row >= 0 && $row <= $self->height() }
+method isValidCol($col) { $col >= 0 && $col <= $self->width()  }
+method isInbounds($row, $col)
 {
     $self->isValidRow($row) && $self->isValidCol($col)
 }
 
-sub set($self, $row, $col, $val) { $self->{_grid}[$row][$col] = $val; return $self; }
+method set($row, $col, $val) { $_grid->[$row][$col] = $val; return $self; }
 
-sub north($self, $row, $col) { return ( $row > 0 ? [$row-1, $col] : undef ) }
-sub south($self, $row, $col) { return ( $row < $self->height ? [$row+1, $col] : undef ) }
-sub west( $self, $row, $col) { return ( $col > 0 ? [$row, $col-1] : undef ) }
-sub east( $self, $row, $col) { return ( $col < $self->width  ? [$row, $col+1] : undef ) }
+method north($row, $col) { return ( $row > 0 ? [$row-1, $col] : undef ) }
+method south($row, $col) { return ( $row < $self->height() ? [$row+1, $col] : undef ) }
+method west( $row, $col) { return ( $col > 0 ? [$row, $col-1] : undef ) }
+method east( $row, $col) { return ( $col < $self->width  ? [$row, $col+1] : undef ) }
 
-sub neighborNESW($self, $r, $c)
+# Get coordinates of valid positions around the given cell.
+# Returns 2 to 4 values, depending on edges and corners.
+method neighborNESW($r, $c)
 {
-    grep { ( 0 <= $_->[0] <= $self->{_height} ) && 
-                   ( 0 <= $_->[1] <= $self->{_width} ) }
+    grep { ( 0 <= $_->[0] <= $self->height() ) && 
+                   ( 0 <= $_->[1] <= $self->width() ) }
         ( [$r-1, $c], [$r, $c+1], [$r+1, $c], [$r, $c-1] );
 }
 
-sub aroundNESW($self, $r, $c)
+# Return list of values and their coordinates,
+# [ a b c d ]
+# [ e f g h ]
+# [ i j k l ]
+# eg. aroundNESW(1,1) is [ ['b', [0,1]], ['g',[1,2]], ['j',[2,1]], ['e',[1,0]] ]
+# in the order N,E,S,W.  May be fewer if at edge,
+# e.g., aroundNESW(0,0) is [ ['b',[0,1]], ['e', [1,0]] ]
+method aroundNESW($r, $c)
 {
-    map { $self->{_grid}->[$_->[0]][$_->[1]] => $_ } $self->neighborNESW($r, $c);
+    map { [ $_grid->[$_->[0]][$_->[1]] => $_  ] } $self->neighborNESW($r, $c);
 }
 
-sub show($self)
+method show()
 {
-    my $grid = $self->{_grid};
-    my $height = $self->{_height};
-    my $width  = $self->{_width};
+    my $grid = $self->grid();
+    my $height = $self->height();
+    my $width  = $self->width();
     my $colFormat = " %2s" x ($width+1);
     my $s = "\n";
 
@@ -82,40 +79,31 @@ sub show($self)
 
 sub loadGrid
 {
-    my $g = AOC::Grid->new();
+    my @g;
     while (<>)
     {
         chomp;
-        push @{$g->{_grid}}, [ split // ];
+        push @g, [ split // ];
     }
-    $g->{_height} = $g->{_grid}->$#*;
-    $g->{_width}  = $g->{_grid}->[0]->$#*;
-    return $g;
+    return AOC::Grid->new(grid=>\@g, height=>$#g, width=> $g[0]->$#*);
 }
 
 sub makeGrid($height, $width, $val)
 {
     my @g;
     push @g, [ ($val) x ($width+1) ] for 0 .. $height;
-    my $grid = AOC::Grid->new();
-    $grid->{_grid} = \@g;
-    $grid->{_height} = $height;
-    $grid->{_width}  = $width;
-    return $grid;
+    return AOC::Grid->new(grid=>\@g, height=>$height, width=>$width);
 }
 
 sub clone($self)
 {
-    my @g;
+    my @new;
+    my $g = $self->grid();
     for my $r ( 0 .. $self->height() )
     {
-        push @g, [ $self->{_grid}->[$r]->@* ];
+        push @new, [ $g->[$r]->@* ];
     }
-    my $grid = AOC::Grid->new();
-    $grid->{_grid} = \@g;
-    $grid->{_height} = $self->height;
-    $grid->{_width}  = $self->width;
-    return $grid;
+    return AOC::Grid->new(grid=>\@new, height=>$self->height, width=>$self->width);
 }
 
 1;
