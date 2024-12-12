@@ -79,6 +79,13 @@ method getBox($ulR, $ulC, $lrR, $lrC)
     return \@box;
 }
 
+method getColumn($c)
+{
+    my @col;
+    push @col, $_grid->[$_][$c] for 0 .. $self->height;
+    return @col;
+}
+
 method show()
 {
     my $grid = $self->grid();
