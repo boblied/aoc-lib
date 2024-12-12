@@ -58,6 +58,27 @@ method aroundNESW($r, $c)
     map { [ $_grid->[$_->[0]][$_->[1]] => $_  ] } $self->neighborNESW($r, $c);
 }
 
+method findChar($char)
+{
+    use List::MoreUtils qw/indexes/;
+    my @place;
+    for my $r (0 .. $_grid->$#*)
+    {
+        push @place, [$r, $_] for indexes { $_ eq $char } $_grid->[$r]->@*;
+    }
+    return @place;
+}
+
+method getBox($ulR, $ulC, $lrR, $lrC)
+{
+    my @box;
+    for my $r ( $ulR .. $lrR )
+    {
+        push @box, [ $_grid->[$r]->@[$ulC .. $lrC] ];
+    }
+    return \@box;
+}
+
 method show()
 {
     my $grid = $self->grid();
