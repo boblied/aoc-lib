@@ -79,6 +79,11 @@ method getBox($ulR, $ulC, $lrR, $lrC)
     return \@box;
 }
 
+method getRow($r)
+{
+    return $_grid->[$r]->@*;
+}
+
 method getColumn($c)
 {
     my @col;
