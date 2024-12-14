@@ -110,6 +110,17 @@ method show()
     return $s;
 }
 
+method gdump()  # Show in condensed format, no spacing
+{
+    my $g = $self->grid();
+    my $s = "\n";
+    for my $r ( 0 .. $self->height() )
+    {
+        $s .= join("", $g->[$r]->@*) . "\n";
+    }
+    return $s;
+}
+
 sub loadGrid
 {
     my @g;
