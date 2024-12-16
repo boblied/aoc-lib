@@ -91,6 +91,14 @@ method getColumn($c)
     return @col;
 }
 
+method replaceColumn($col, $vert)
+{
+    for my $row ( 0 .. $self->height )
+    {
+        $_grid->[$row][$col] = $vert->[$row];
+    }
+}
+
 method show()
 {
     my $grid = $self->grid();
