@@ -18,7 +18,10 @@ our $logger;
 our $DoTest  = 0;
 my $DoDebug = 0;
 
-sub setup()
+my %stdOptions = ( "test" => \$DoTest,
+                   "debug:s" => \$DoDebug );
+
+sub setup($otherArgs = {})
 {
     use Log::Log4perl qw(:easy);
     use Getopt::Long;
@@ -32,7 +35,7 @@ sub setup()
     my %DBLEVEL = ( 1 => $INFO, 2 => $DEBUG, 3 => $TRACE,
         i => $INFO, d => $DEBUG, t => $TRACE, );
 
-    GetOptions("test" => \$DoTest, "debug:s" => \$DoDebug);
+    GetOptions(%stdOptions, %$otherArgs);
     $logger->level($DBLEVEL{$DoDebug}) if $DoDebug;
 }
 
