@@ -58,6 +58,21 @@ method aroundNESW($r, $c)
     map { [ $_grid->[$_->[0]][$_->[1]] => $_  ] } $self->neighborNESW($r, $c);
 }
 
+# Return a list of all 8 neighbors, including diagonals
+method neighborAll($r, $c)
+{
+    grep { ( 0 <= $_->[0] <= $self->height() ) && 
+                   ( 0 <= $_->[1] <= $self->width() ) }
+        ( [$r-1, $c-1], [$r-1, $c], [$r-1, $c+1],
+          [$r,   $c-1],             [$r,   $c+1],
+          [$r+1, $c-1], [$r+1, $c], [$r+1, $c+1] );
+}
+
+method aroundAll($r, $c)
+{
+    map { [ $_grid->[$_->[0]][$_->[1]] => $_  ] } $self->neighborAll($r, $c);
+}
+
 method findChar($char)
 {
     use List::MoreUtils qw/indexes/;
